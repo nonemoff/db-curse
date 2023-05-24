@@ -3,9 +3,9 @@ DROP TABLE IF EXISTS author CASCADE;
 CREATE TABLE IF NOT EXISTS author 
 (
 	id              serial PRIMARY KEY,
-	second_name 	varchar(30) NOT NULL,
-	first_name      varchar(30) NOT NULL,
-	third_name      varchar(30)
+	second_name 	varchar (30) NOT NULL,
+	first_name      varchar (30) NOT NULL,
+	third_name      varchar (30) DEFAULT ('')
 );
 
 ----------------------------------------------------------------------------------------------------
@@ -13,8 +13,8 @@ DROP TABLE IF EXISTS book CASCADE;
 CREATE TABLE IF NOT EXISTS book 
 (
 	id              serial PRIMARY KEY,
-	name            varchar(100) NOT NULL,
-	author_id       integer REFERENCES author (id) 	NOT NULL,
+	name            varchar (100) NOT NULL,
+	author_id       integer REFERENCES author (id) NOT NULL,
 	deposit         money NOT NULL,
 	cost_per_day 	money NOT NULL
 );
@@ -27,12 +27,12 @@ CREATE TABLE IF NOT EXISTS genre
 	name 	        varchar(100) NOT NULL
 );
 
-
+----------------------------------------------------------------------------------------------------
 DROP TABLE IF EXISTS book_genre CASCADE;
 CREATE TABLE IF NOT EXISTS book_genre 
 (
 	book_id         serial REFERENCES book (id) NOT NULL,
-	genre_id	    integer REFERENCES genre (id) NOT NULL
+	genre_id	integer REFERENCES genre (id) NOT NULL
 );
 
 ----------------------------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS customer
 	id serial PRIMARY KEY,
 	second_name 	varchar(30) NOT NULL,
 	first_name      varchar(30) NOT NULL,
-	third_name      varchar(30),
+	third_name      varchar(30) DEFAULT (''),
 	address         varchar(50) NOT NULL,
 	contacts        varchar(16) NOT NULL
 );
@@ -70,8 +70,8 @@ CREATE TABLE IF NOT EXISTS transaction
 	id              serial PRIMARY KEY,
 	customer_id 	integer REFERENCES customer (id) NOT NULL,
 	book_id         integer REFERENCES book (id) NOT NULL,
-	date_out        timestamp DEFAULT(CURRENT_TIMESTAMP),
-	date_in         date,
-	penalty         money DEFAULT(0)
+	date_out        timestamp DEFAULT (CURRENT_TIMESTAMP),
+	date_in         date DEFAULT (NULL),
+	penalty         money DEFAULT (0)
 );
 ----------------------------------------------------------------------------------------------------

@@ -1,4 +1,6 @@
-----------------------------------------------------------------------------------------------------
+-------------------------------------------------------------
+-- Table author ---------------------------------------------
+
 DROP TABLE IF EXISTS author CASCADE;
 CREATE TABLE IF NOT EXISTS author 
 (
@@ -8,18 +10,24 @@ CREATE TABLE IF NOT EXISTS author
 	third_name      varchar (30) DEFAULT ('')
 );
 
-----------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------
+-- Table book -----------------------------------------------
+
 DROP TABLE IF EXISTS book CASCADE;
 CREATE TABLE IF NOT EXISTS book 
 (
 	id              serial PRIMARY KEY,
 	name            varchar (100) NOT NULL,
 	author_id       integer REFERENCES author (id) NOT NULL,
-	deposit         money NOT NULL,
-	cost_per_day 	money NOT NULL
+	deposit         real NOT NULL,
+	cost_per_day 	real NOT NULL
 );
 
-----------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------
+-- Table genre ----------------------------------------------
+
 DROP TABLE IF EXISTS genre CASCADE;
 CREATE TABLE IF NOT EXISTS genre 
 (
@@ -27,15 +35,21 @@ CREATE TABLE IF NOT EXISTS genre
 	name 	        varchar(100) NOT NULL
 );
 
-----------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------
+-- Table book_genre -----------------------------------------
+
 DROP TABLE IF EXISTS book_genre CASCADE;
 CREATE TABLE IF NOT EXISTS book_genre 
 (
 	book_id         serial REFERENCES book (id) NOT NULL,
-	genre_id	integer REFERENCES genre (id) NOT NULL
+	genre_id		integer REFERENCES genre (id) NOT NULL
 );
 
-----------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------
+-- Table customer -------------------------------------------
+
 DROP TABLE IF EXISTS customer CASCADE;
 CREATE TABLE IF NOT EXISTS customer 
 (
@@ -47,7 +61,10 @@ CREATE TABLE IF NOT EXISTS customer
 	contacts        varchar(16) NOT NULL
 );
 
-----------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------
+-- Table category -------------------------------------------
+
 DROP TABLE IF EXISTS category CASCADE;
 CREATE TABLE IF NOT EXISTS category 
 (
@@ -55,7 +72,10 @@ CREATE TABLE IF NOT EXISTS category
 	name 	        varchar(100) NOT NULL
 );
 
-----------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------
+-- Table customer_category ----------------------------------
+
 DROP TABLE IF EXISTS customer_category CASCADE;
 CREATE TABLE IF NOT EXISTS customer_category 
 (
@@ -63,7 +83,10 @@ CREATE TABLE IF NOT EXISTS customer_category
 	category_id 	integer REFERENCES category (id) NOT NULL
 );
 
-----------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------
+-- Table transaction ----------------------------------------
+
 DROP TABLE IF EXISTS transaction CASCADE;
 CREATE TABLE IF NOT EXISTS transaction 
 (
@@ -72,6 +95,8 @@ CREATE TABLE IF NOT EXISTS transaction
 	book_id         integer REFERENCES book (id) NOT NULL,
 	date_out        timestamp DEFAULT (CURRENT_TIMESTAMP),
 	date_in         date DEFAULT (NULL),
-	penalty         money DEFAULT (0)
+	penalty         real DEFAULT (0)
 );
-----------------------------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------

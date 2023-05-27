@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS author
 	id              serial PRIMARY KEY,
 	second_name 	varchar (30) NOT NULL,
 	first_name      varchar (30) NOT NULL,
-	third_name      varchar (30) DEFAULT ('')
+	third_name      varchar (30) DEFAULT (NULL)
 );
 
 
@@ -21,7 +21,9 @@ CREATE TABLE IF NOT EXISTS book
 	name            varchar (100) NOT NULL,
 	author_id       integer REFERENCES author (id) NOT NULL,
 	deposit         real NOT NULL,
-	cost_per_day 	real NOT NULL
+	cost_per_day 	real NOT NULL,
+	comment         text DEFAULT ('Новая книга'),
+	available      boolean DEFAULT (TRUE)
 );
 
 
@@ -43,7 +45,7 @@ DROP TABLE IF EXISTS book_genre CASCADE;
 CREATE TABLE IF NOT EXISTS book_genre 
 (
 	book_id         serial REFERENCES book (id) NOT NULL,
-	genre_id		integer REFERENCES genre (id) NOT NULL
+	genre_id        integer REFERENCES genre (id) NOT NULL
 );
 
 
@@ -58,7 +60,7 @@ CREATE TABLE IF NOT EXISTS customer
 	first_name      varchar(30) NOT NULL,
 	third_name      varchar(30) DEFAULT (''),
 	address         varchar(50) NOT NULL,
-	contacts        varchar(16) NOT NULL
+	contacts        varchar(18) NOT NULL
 );
 
 
@@ -69,7 +71,8 @@ DROP TABLE IF EXISTS category CASCADE;
 CREATE TABLE IF NOT EXISTS category 
 (
 	id              serial PRIMARY KEY,
-	name 	        varchar(100) NOT NULL
+	name 	        varchar(100) NOT NULL,
+	discount        real NOT NULL
 );
 
 
@@ -93,10 +96,11 @@ CREATE TABLE IF NOT EXISTS transaction
 	id              serial PRIMARY KEY,
 	customer_id 	integer REFERENCES customer (id) NOT NULL,
 	book_id         integer REFERENCES book (id) NOT NULL,
-	date_out        timestamp DEFAULT (CURRENT_TIMESTAMP),
+	date_out        date DEFAULT (CURRENT_DATE),
 	date_in         date DEFAULT (NULL),
-	penalty         real DEFAULT (0)
+	penalty         real DEFAULT (0),
+	total           real DEFAULT (NULL)
 );
 
-
 -------------------------------------------------------------
+

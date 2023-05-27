@@ -1,0 +1,19 @@
+CREATE OR REPLACE FUNCTION total_counter()
+RETURNS TRIGGER
+AS $$
+	BEGIN
+	IF NEW.date_in IS NOT NULL THEN
+		NEW.total = interval_counter(NEW.date_out, NEW.date_in) * 
+			(SELECT cost_per_day from book where id = NEW.book_id);
+		NEW.total = NEW.total + NEW.penalty;
+		RAISE NOTICE 'Итоговая стоимость составит: % рублей', NEW.total;
+	END IF;
+	RETURN NEW;
+	END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER total_counter
+BEFORE UPDATE ON transaction
+FOR EACH ROW
+EXECUTE FUNCTION total_counter();
+

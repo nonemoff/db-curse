@@ -1,0 +1,42 @@
+CREATE OR REPLACE PROCEDURE close_transaction 
+(
+	customer_contacts character varying(18),
+	book_name character varying(100)
+)
+AS $$
+BEGIN
+	UPDATE transaction SET date_in = CURRENT_DATE 
+	WHERE date_in IS NULL AND 
+	customer_id = (SELECT id FROM customer 
+				   WHERE contacts = contacts_formatter(customer_contacts)) AND
+	book_id = (SELECT id FROM book WHERE name = book_name);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE PROCEDURE close_transaction 
+(
+	customer_contacts character varying(18),
+	book_name character varying(100),
+	customer_penalty real, 
+	new_comment text
+)
+AS $$
+BEGIN
+	UPDATE transaction SET date_in = CURRENT_DATE, penalty = customer_penalty
+	WHERE date_in IS NULL AND 
+	customer_id = (SELECT id FROM customer 
+				   WHERE contacts = contacts_formatter(customer_contacts)) AND
+	book_id = (SELECT id FROM book WHERE name = book_name);
+	UPDATE book SET comment = new_comment WHERE name = book_name; 
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+CREATE OR REPLACE FUNCTION auto_category()
+RETURNS TRIGGER
+AS $$ 
+	BEGIN
+	INSERT INTO customer_category
+	VALUES (NEW.id, 4);
+	RETURN NEW;
+	END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER auto_category
+AFTER INSERT ON customer
+FOR EACH ROW EXECUTE FUNCTION auto_category();

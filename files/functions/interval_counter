@@ -1,0 +1,12 @@
+CREATE OR REPLACE FUNCTION interval_counter(date_o date, date_i date)
+RETURNS integer
+AS $$
+	DECLARE
+		days integer;
+	BEGIN
+		
+		days = (EXTRACT(EPOCH FROM AGE(date_i, date_o))/60/60/24)::integer;
+		RETURN days;
+	END
+$$ LANGUAGE plpgsql;
+

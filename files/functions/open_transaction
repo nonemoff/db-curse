@@ -1,0 +1,15 @@
+CREATE OR REPLACE PROCEDURE new_transaction
+(
+	customer_contacts       character varying(18),
+	book_name               character varying(100)
+) 
+AS $$
+BEGIN
+	INSERT INTO transaction
+	(customer_id, book_id)
+	VALUES
+	((SELECT id FROM customer WHERE contacts = contacts_formatter(customer_contacts)),
+	(SELECT id FROM book WHERE name = book_name));
+END;
+$$ LANGUAGE PLPGSQL;
+

@@ -1,0 +1,16 @@
+CREATE OR REPLACE FUNCTION contacts_formatter(contacts character varying(18))
+RETURNS character varying(18) 
+AS $$
+DECLARE
+	formated_contacts character varying(18);
+BEGIN
+
+	formated_contacts = CONCAT(
+		'+', substr (contacts, 1, 1),
+		' (', substr (contacts, 2, 3), ') ',
+		substr (contacts, 5, 3), '-',
+		substr (contacts, 8, 2), '-',
+		substr( contacts, 10, 2));
+	RETURN formated_contacts;
+END;
+$$ LANGUAGE plpgsql;

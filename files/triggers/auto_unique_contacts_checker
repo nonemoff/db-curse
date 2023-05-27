@@ -1,0 +1,15 @@
+CREATE OR REPLACE FUNCTION unique_contacts_checker()
+RETURNS TRIGGER
+AS $$
+BEGIN
+	IF NEW.contacts IN (SELECT contacts FROM customer) THEN 
+		RAISE EXCEPTION 'Уже есть клиент с таким номером телефона!';
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER auto_unique_contacts_checker
+BEFORE INSERT OR UPDATE ON customer
+FOR EACH ROW
+EXECUTE FUNCTION unique_contacts_checker();

@@ -1,0 +1,13 @@
+CREATE OR REPLACE FUNCTION auto_contacts_formater()
+RETURNS TRIGGER
+AS $$
+BEGIN
+	NEW.contacts = contacts_formatter(NEW.contacts);
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER auto_contacts_formater
+BEFORE INSERT ON customer
+FOR EACH ROW
+EXECUTE FUNCTION auto_contacts_formater();

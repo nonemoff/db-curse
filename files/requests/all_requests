@@ -1,0 +1,10 @@
+-- Req 1: вывести названия всех книг
+SELECT NAME FROM book;
+
+-- Req 2: вывести для каждого клиента размер скидки 
+-- в зависимости от его категории
+SELECT second_name, first_name, third_name, discount 
+FROM customer, customer_category, category
+WHERE customer_id = customer.id AND
+category_id = category.id;
+

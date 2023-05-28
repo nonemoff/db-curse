@@ -1,11 +1,18 @@
 CREATE OR REPLACE FUNCTION total_counter()
 RETURNS TRIGGER
 AS $$
+	DECLARE 
+		discount_size real;
 	BEGIN
+		discount_size := 1 - (SELECT(discount/100) 
+                              FROM customer, customer_category, category
+                              WHERE customer.id = NEW.customer_id AND
+                              customer.id = customer_category.customer_id AND
+                              category.id = customer_category.category_id);
 	IF NEW.date_in IS NOT NULL THEN
 		NEW.total = interval_counter(NEW.date_out, NEW.date_in) * 
 			(SELECT cost_per_day from book where id = NEW.book_id);
-		NEW.total = NEW.total + NEW.penalty;
+		NEW.total = FLOOR(NEW.total*discount_size) + NEW.penalty;
 		RAISE NOTICE 'Итоговая стоимость составит: % рублей', NEW.total;
 	END IF;
 	RETURN NEW;
@@ -16,4 +23,3 @@ CREATE OR REPLACE TRIGGER total_counter
 BEFORE UPDATE ON transaction
 FOR EACH ROW
 EXECUTE FUNCTION total_counter();
-

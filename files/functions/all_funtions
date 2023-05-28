@@ -1,0 +1,96 @@
+-------------------------------------------------------------
+-- Закрытие транзакции с перегрузкой ------------------------
+-- Если нет штрафа за состояние книги
+CREATE OR REPLACE PROCEDURE close_transaction 
+(
+	customer_contacts character varying(18),
+	book_name character varying(100)
+)
+AS $$
+BEGIN
+	UPDATE transaction SET date_in = CURRENT_DATE 
+	WHERE date_in IS NULL AND 
+	customer_id = (SELECT id FROM customer 
+				   WHERE contacts = contacts_formatter(customer_contacts)) AND
+	book_id = (SELECT id FROM book WHERE name = book_name);
+END;
+$$ LANGUAGE plpgsql;
+
+-- если есть штраф за состояние книги
+CREATE OR REPLACE PROCEDURE close_transaction 
+(
+	customer_contacts character varying(18),
+	book_name character varying(100),
+	customer_penalty real, 
+	new_comment text
+)
+AS $$
+BEGIN
+	UPDATE transaction SET date_in = CURRENT_DATE, penalty = customer_penalty
+	WHERE date_in IS NULL AND 
+	customer_id = (SELECT id FROM customer 
+				   WHERE contacts = contacts_formatter(customer_contacts)) AND
+	book_id = (SELECT id FROM book WHERE name = book_name);
+	UPDATE book SET comment = new_comment WHERE name = book_name; 
+END;
+$$ LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------
+-- Автоматическое перобразование номеров в базе данных ------
+-- к маске +Х (ХХХ) ХХХ-ХХ-ХХ -------------------------------
+
+CREATE OR REPLACE FUNCTION contacts_formatter(contacts character varying(18))
+RETURNS character varying(18) 
+AS $$
+DECLARE
+	formated_contacts character varying(18);
+BEGIN
+
+	formated_contacts = CONCAT(
+		'+', substr (contacts, 1, 1),
+		' (', substr (contacts, 2, 3), ') ',
+		substr (contacts, 5, 3), '-',
+		substr (contacts, 8, 2), '-',
+		substr( contacts, 10, 2));
+	RETURN formated_contacts;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------
+-- Необходимый для работы подсчета стоимости проката --------
+-- конвертер интервала в дни --------------------------------
+
+CREATE OR REPLACE FUNCTION interval_counter(date_o date, date_i date)
+RETURNS integer
+AS $$
+	DECLARE
+		days integer;
+	BEGIN
+		
+		days = (EXTRACT(EPOCH FROM AGE(date_i, date_o))/60/60/24)::integer;
+		RETURN days;
+	END
+$$ LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------
+-- Функция для создания новой транзакции, необходимая для ---
+-- удобной работы с базой данных ----------------------------
+
+CREATE OR REPLACE PROCEDURE new_transaction
+(
+	customer_contacts       character varying(18),
+	book_name               character varying(100)
+) 
+AS $$
+BEGIN
+	INSERT INTO transaction
+	(customer_id, book_id)
+	VALUES
+	((SELECT id FROM customer WHERE contacts = contacts_formatter(customer_contacts)),
+	(SELECT id FROM book WHERE name = book_name));
+END;
+$$ LANGUAGE PLPGSQL;
+

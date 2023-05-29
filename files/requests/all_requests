@@ -178,7 +178,7 @@ ORDER BY total_income DESC;
 
 
 -------------------------------------------------------------
--- Req 18: посчитать сколько принес прокат каждой книги -----
+-- Req 18: Определить клиентов, которые не вернули книгу ----
 
 SELECT second_name, first_name, third_name, contacts
 FROM customer 

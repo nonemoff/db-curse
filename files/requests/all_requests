@@ -1,10 +1,207 @@
--- Req 1: вывести названия всех книг
-SELECT NAME FROM book;
+-------------------------------------------------------------
+-- Req 1: вывести названия всех книг ------------------------
 
--- Req 2: вывести для каждого клиента размер скидки 
--- в зависимости от его категории
+SELECT name FROM book;
+
+
+-------------------------------------------------------------
+-- Req 2: вывести для каждого клиента размер скидки ---------
+-- в зависимости от его категории ---------------------------
+
 SELECT second_name, first_name, third_name, discount 
 FROM customer, customer_category, category
 WHERE customer_id = customer.id AND
 category_id = category.id;
+
+
+-------------------------------------------------------------
+-- Req 3: вывести контакты, название книги для всех ---------
+-- транзакций -----------------------------------------------
+
+SELECT contacts, book.name, date_out, date_in, penalty, total
+FROM transaction, customer, book
+WHERE customer_id = customer.id AND
+book_id = book.id;
+
+
+-------------------------------------------------------------
+-- Req 4: вывести сумму всех транзакций ---------------------
+SELECT SUM(total) FROM transaction
+WHERE total IS NOT NULL;
+
+-------------------------------------------------------------
+-- Req 5: посчитать для каждого клиента, сколько он ---------
+-- совершил транзакций --------------------------------------
+
+SELECT second_name, first_name, third_name, SUM(total)
+FROM transaction, customer
+WHERE total IS NOT NULL AND
+customer_id = customer.id
+GROUP BY second_name, first_name, third_name;
+
+
+-------------------------------------------------------------
+-- Req 6: вычислить стоимость всех транзакций без учета -----
+-- скидки ---------------------------------------------------
+
+SELECT id, customer_id, book_id, date_out, date_in,
+    penalty, total, SUM(interval_counter(date_out, date_in) * 
+	(select cost_per_day from book where book_id = book.id)) 
+	OVER (PARTITION BY id) AS "total without discount"
+FROM 
+    transaction;
+	
+
+-------------------------------------------------------------
+-- Req 7: посчитать среднее количество дней проката книги ---
+
+SELECT AVG(interval_counter(date_out, date_in)) 
+FROM transaction WHERE date_in IS NOT NULL;
+
+
+-------------------------------------------------------------
+-- Req 8: Вывести количество клиентов каждой категории ------
+
+SELECT name, COUNT(*) 
+FROM category, customer_category
+WHERE category.id = category_id
+GROUP BY name, category_id;
+
+
+-------------------------------------------------------------
+-- Req 9: сделать сводку об клиенте, если он брал в прокат --
+-- книгу больше 1 раза - частый клиент ----------------------
+-- остальное - обычный клиент -------------------------------
+
+SELECT second_name, first_name, third_name,
+	CASE
+		WHEN COUNT(*) > 1 THEN 'Частый клиент'
+		ELSE 'Обычный клиент'
+	END AS "information"
+FROM customer, transaction
+WHERE customer_id = customer.id AND
+date_in IS NOT NULL
+GROUP BY second_name, first_name, third_name;
+
+
+-------------------------------------------------------------
+-- Req 10: вывести книги и их авторов -----------------------
+
+SELECT second_name, first_name, third_name, name 
+FROM author
+JOIN (SELECT author_id, name FROM book) b 
+ON author.id = b.author_id;
+
+
+-------------------------------------------------------------
+-- Req 11: вывести 5 последних созданных транзакций ---------
+
+SELECT * FROM transaction 
+ORDER BY date_out DESC
+LIMIT 5;
+
+
+-------------------------------------------------------------
+-- Req 12: вывести ФИО каждого пенсионера -------------------
+
+SELECT second_name || ' ' || first_name || ' ' || third_name AS "ФИО"
+FROM customer, category, customer_category
+WHERE customer_id = customer.id AND
+category.id = category_id AND
+category.name = 'Пенсионер';
+
+
+-------------------------------------------------------------
+-- Req 13: вывести информацию для каждого жанра: ------------
+-- сколько книг имеют такой жанр, какие авторы у книг -------
+-- этого жанра ----------------------------------------------
+
+SELECT g.name AS genre_name,
+       COUNT(*) AS book_count,
+       STRING_AGG(DISTINCT a.first_name || ' ' || a.second_name, ', ') AS authors
+FROM transaction t
+JOIN customer c ON t.customer_id = c.id
+JOIN book b ON t.book_id = b.id
+JOIN book_genre bg ON b.id = bg.book_id
+JOIN genre g ON bg.genre_id = g.id
+JOIN author a ON b.author_id = a.id
+WHERE c.id = customer_id
+GROUP BY g.name
+ORDER BY book_count DESC;
+
+
+-------------------------------------------------------------
+-- Req 14: вывести любимый жанр клиента ---------------------
+
+SELECT g.name AS favorite_genre
+FROM genre g
+JOIN book_genre bg ON g.id = bg.genre_id
+JOIN book b ON bg.book_id = b.id
+JOIN transaction t ON b.id = t.book_id
+WHERE t.customer_id = 1
+GROUP BY g.name
+ORDER BY COUNT(*) DESC
+LIMIT 1;
+
+
+
+-------------------------------------------------------------
+-- Req 15: вывести книги, которые ни разу не брали в --------
+-- прокат ---------------------------------------------------
+
+SELECT name 
+FROM book 
+WHERE
+id NOT IN (SELECT book_id FROM transaction)
+
+
+-------------------------------------------------------------
+-- Req 16: вывести для каждой книги, сколько ее раз брали ---
+-- в прокат -------------------------------------------------
+
+SELECT b.name AS book_name, COUNT(*) AS rent_count
+FROM book b
+JOIN transaction t ON b.id = t.book_id
+GROUP BY b.name
+ORDER BY rent_count DESC;
+
+
+-------------------------------------------------------------
+-- Req 17: посчитать сколько принес прокат каждой книги -----
+
+SELECT b.name AS book_name, SUM(t.total) AS total_income
+FROM book b
+JOIN transaction t ON b.id = t.book_id
+WHERE t.date_in IS NOT NULL
+GROUP BY b.name
+ORDER BY total_income DESC;
+
+
+-------------------------------------------------------------
+-- Req 18: посчитать сколько принес прокат каждой книги -----
+
+SELECT second_name, first_name, third_name, contacts
+FROM customer 
+JOIN transaction t ON customer.id = t.customer_id
+WHERE date_in IS NULL;
+
+
+-------------------------------------------------------------
+-- Req 19: вывести все доступные для аренды книги -----------
+
+SELECT name
+FROM book
+WHERE available = TRUE;
+
+
+-------------------------------------------------------------
+-- Req 20: вывести количество книг каждого автора -----------
+
+SELECT second_name, first_name, third_name, COUNT(b.id) AS book_count
+FROM author 
+JOIN book b ON author.id = b.author_id
+GROUP BY author.id, first_name, second_name;
+
+
+
 

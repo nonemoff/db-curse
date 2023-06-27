@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE new_transaction
+CREATE OR REPLACE PROCEDURE open_transaction
 (
 	customer_contacts       character varying(18),
 	book_name               character varying(100)
